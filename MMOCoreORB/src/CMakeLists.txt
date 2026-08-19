@@ -24,13 +24,14 @@ if(BUILD_IDL)
 	foreach(idl ${idls})
 		string(REPLACE "src/" "src/autogen/" autogen_base ${idl})
 		string(REPLACE ".idl" ".cpp" autogen_cpp ${autogen_base})
+		string(REPLACE ".idl" ".h" autogen_h ${autogen_base})
 
 		set(autogen_sources ${autogen_sources} "${autogen_cpp}")
 
 		string(REGEX REPLACE ".+\/src\/" "" idl_f ${idl})
 		string(CONCAT idl_b "src/" ${idl_f})
 
-		add_custom_command(OUTPUT "${autogen_cpp}" #"${autogen_h}"
+		add_custom_command(OUTPUT "${autogen_cpp}" "${autogen_h}"
 			COMMAND ${Java_JAVA_EXECUTABLE} ${IDLC_JAVA_ARGS} ${IDL_DIRECTIVES} -silence -rbcpp -sd src ${idl_f}
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 			DEPENDS ${idl}
