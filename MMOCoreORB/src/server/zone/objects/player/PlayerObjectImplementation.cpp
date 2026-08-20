@@ -3150,7 +3150,8 @@ int PlayerObjectImplementation::getLotsRemaining() {
 		return 0;
 	}
 
-	int lotsRemaining = maximumLots * characters->size();
+	int characterLimit = ConfigManager::instance()->getInt("Core3.PlayerCreationManager.MaxCharactersPerGalaxy", 10);
+	int lotsRemaining = maximumLots * characterLimit;
 
 	for (int i = 0; i < characters->size(); ++i) {
 		CharacterListEntry& entry = characters->get(i);
