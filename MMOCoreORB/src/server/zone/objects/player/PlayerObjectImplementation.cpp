@@ -1352,6 +1352,7 @@ void PlayerObjectImplementation::doDigest(int fillingReduction) {
 		return;
 
 	// Make sure filling isn't over max before we reduce
+	fillingReduction *= 5;
 	if (foodFilling > foodFillingMax)
 		foodFilling = foodFillingMax;
 
@@ -3140,17 +3141,41 @@ void PlayerObjectImplementation::deleteAllWaypoints() {
 }
 
 int PlayerObjectImplementation::getLotsRemaining() {
-	Locker locker(asPlayerObject());
+	if (account == nullptr) {
+		return 0;
+	}
 
-	int lotsRemaining = maximumLots;
+	Reference<CharacterList*> characters = account->getCharacterList();
+	ZoneServer* zoneServer = server->getZoneServer();
 
-	for (int i = 0; i < ownedStructures.size(); ++i) {
-		auto oid = ownedStructures.get(i);
+	if (characters == nullptr || zoneServer == nullptr) {
+		return 0;
+	}
 
-		Reference<StructureObject*> structure = getZoneServer()->getObject(oid).castTo<StructureObject*>();
+	int lotsRemaining = maximumLots * characters->size();
 
-		if (structure != nullptr) {
-			lotsRemaining = lotsRemaining - structure->getLotSize();
+	for (int i = 0; i < characters->size(); ++i) {
+		CharacterListEntry& entry = characters->get(i);
+		uint64 oid = entry.getObjectID();
+
+		ManagedReference<CreatureObject*> obj = zoneServer->getObject(oid).castTo<CreatureObject*>();
+
+		if (obj != nullptr) {
+			ManagedReference<PlayerObject*> ghost = obj->getPlayerObject();
+
+			if (ghost != nullptr) {
+				int ownedStructureCount = ghost->getTotalOwnedStructureCount();
+
+				for (int j = 0; j < ownedStructureCount; ++j) {
+					auto oid = ghost->getOwnedStructure(j);
+					ManagedReference<StructureObject*> structure = getZoneServer()->getObject(oid).castTo<StructureObject*>();
+
+
+					if (structure != nullptr) {
+						lotsRemaining -= structure->getLotSize();
+					}
+				}
+			}
 		}
 	}
 
