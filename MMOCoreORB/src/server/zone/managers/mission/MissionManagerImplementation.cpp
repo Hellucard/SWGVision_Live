@@ -858,19 +858,10 @@ void MissionManagerImplementation::randomizeGenericDestroyMission(CreatureObject
 			directionChoice = Float::valueOf(directionData);
 	}
 
-	if (levelChoice > 0) {
+	if (levelChoice > 0)
 		diffDisplay += levelChoice;
-	} else if (player->isGrouped()) {
-		bool includeFactionPets = faction != Factions::FACTIONNEUTRAL || ConfigManager::instance()->includeFactionPetsForMissionDifficulty();
-		Reference<GroupObject*> group = player->getGroup();
-
-		if (group != nullptr) {
-			Locker locker(group);
-			diffDisplay += group->getGroupLevel(includeFactionPets);
-		}
-	} else {
+	else
 		diffDisplay += playerLevel;
-	}
 
 	String building = lairTemplateObject->getMissionBuilding(difficulty);
 
@@ -981,7 +972,16 @@ void MissionManagerImplementation::randomizeGenericDestroyMission(CreatureObject
 	if (mobiles != nullptr && mobiles->size() > 0)
 		lairType = mobiles->elementAt(0).getKey().replaceAll("_", " ") + (lairTemplateObject->getMobType() == LairTemplate::NPC ? " base" : " lair");
 
-	mission->setMissionTitle("CL:" + String::valueOf(diffDisplay), lairType);
+	bool capitalizeNext = true;
+
+	for (int i = 0; i < lairType.length(); ++i) {
+		if (capitalizeNext && lairType[i] != ' ')
+			lairType[i] = toupper(lairType[i]);
+
+		capitalizeNext = lairType[i] == ' ';
+	}
+
+	mission->setMissionTitle("CL" + String::valueOf(diffDisplay), " " + lairType);
 	mission->setMissionDescription("mission/mission_destroy_neutral" +  messageDifficulty + missionType, "m" + String::valueOf(randTexts) + "d");
 
 	switch (faction) {
@@ -1911,19 +1911,25 @@ LairSpawn* MissionManagerImplementation::getRandomLairSpawn(CreatureObject* play
 	int counter = availableLairList->size();
 	int playerLevel = server->getPlayerManager()->calculatePlayerLevel(player);
 
-	if (player->isGrouped()) {
-		bool includeFactionPets = faction != Factions::FACTIONNEUTRAL || ConfigManager::instance()->includeFactionPetsForMissionDifficulty();
-		Reference<GroupObject*> group = player->getGroup();
+	if (type == MissionTypes::DESTROY) {
+		PlayerObject* ghost = player->getPlayerObject();
 
-		if (group != nullptr) {
-			Locker locker(group);
-			playerLevel = group->getGroupLevel(includeFactionPets);
+		if (ghost != nullptr) {
+			String levelData = ghost->getScreenPlayData("mission_level", "levelChoice");
+
+			if (!levelData.isEmpty()) {
+				int levelChoice = Integer::valueOf(levelData);
+
+				if (levelChoice > 0) {
+					playerLevel = levelChoice;
+				}
+			}
 		}
 	}
 
 	LairSpawn* lairSpawn = nullptr;
 
-	//Cap the minLevel to prevent a group from being too high to get missions on a planet
+	// Cap the minimum level so high-level selections can still receive missions on this planet
 	int minLevel = Math::min(playerLevel - 5, minLevelCeiling);
 
 	//Try to pick random lair within playerLevel +-5;
