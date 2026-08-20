@@ -5,13 +5,13 @@ mission_level = ScreenPlay:new {
 
     levels = {
         {levelRange = "Reset Level Range", levelSelect = 0},
-        {levelRange = "Novice Elite Combat", levelSelect = 7},
-        {levelRange = "2222 Elite Combat", levelSelect = 15},
-        {levelRange = "Master Elite Combat", levelSelect = 25},
-        {levelRange = "Tri Elite Combat", levelSelect = 75},
-        {levelRange = "Level 1", levelSelect = 100},
-        {levelRange = "Level 2", levelSelect = 200},
-        {levelRange = "Max", levelSelect = 300}
+        {levelRange = "Level 7 (Novice)", levelSelect = 7},
+        {levelRange = "Level 15 (4444)", levelSelect = 15},
+        {levelRange = "Level 25 (Elite Profession 2222)", levelSelect = 25},
+        {levelRange = "Level 75 (Master Profession)", levelSelect = 75},
+        {levelRange = "Level 100 (Mid Build)", levelSelect = 100},
+        {levelRange = "Level 200 (Full Template)", levelSelect = 200},
+        {levelRange = "Level 300 (Full Template)", levelSelect = 300}
     }
 }
 
