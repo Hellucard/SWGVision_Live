@@ -201,6 +201,7 @@ void MissionObjectiveImplementation::awardReward() {
 	}
 
 	ManagedReference<GroupObject*> group = owner->getGroup();
+	bool fullGroupReward = mission->getTypeCRC() == MissionTypes::DESTROY;
 
 	auto ownerZone = owner->getZone();
 
@@ -270,7 +271,7 @@ void MissionObjectiveImplementation::awardReward() {
 					memberPosition.setZ(0);
 				}
 
-				if (memberPosition.distanceTo(missionEndPoint) < 128) {
+				if (fullGroupReward || memberPosition.distanceTo(missionEndPoint) < 128) {
 					players.add(groupMember);
 				}
 			} else if(groupMember->isPet()) {
@@ -305,10 +306,10 @@ void MissionObjectiveImplementation::awardReward() {
 		players.add(owner);
 	}
 
-	int divisor = mission->getRewardCreditsDivisor();
+	int divisor = fullGroupReward ? 1 : mission->getRewardCreditsDivisor();
 	bool expanded = false;
 
-	if (playerCount > divisor) {
+	if (!fullGroupReward && playerCount > divisor) {
 		divisor = playerCount;
 		expanded = true;
 	}
