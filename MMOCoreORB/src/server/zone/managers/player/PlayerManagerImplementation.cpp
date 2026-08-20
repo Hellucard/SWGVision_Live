@@ -327,6 +327,12 @@ void PlayerManagerImplementation::loadStartingLocations() {
 
 	delete iffStream;
 
+	// SWGVision uses Coronet as the sole starting city for new characters.
+	for (int i = startingLocationList.size() - 1; i >= 0; --i) {
+		if (startingLocationList.get(i).getLocation() != "coronet")
+			startingLocationList.remove(i);
+	}
+
 	info(true) << "Loaded " << startingLocationList.getTotalLocations() << " starting locations.";
 }
 

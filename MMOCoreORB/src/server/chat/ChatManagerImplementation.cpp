@@ -73,6 +73,7 @@ void ChatManagerImplementation::stop() {
 	roomMap = nullptr;
 	server = nullptr;
 	galaxyRoom = nullptr;
+	galaxyChatRoom = nullptr;
 	systemRoom = nullptr;
 	groupRoom = nullptr;
 	guildRoom = nullptr;
@@ -316,6 +317,11 @@ void ChatManagerImplementation::initiateRooms() {
 	generalRoom->setCanEnter(true);
 	generalRoom->setAllowSubrooms(true);
 	generalRoom->setTitle("public chat for this server, can create rooms here");
+
+	galaxyChatRoom = createRoom("Galaxy", galaxyRoom);
+	galaxyChatRoom->setCanEnter(true);
+	galaxyChatRoom->setAllowSubrooms(false);
+	galaxyChatRoom->setTitle("Galaxy-wide chat for all players");
 
 	auctionRoom = createRoom("Auction", galaxyRoom);
 	auctionRoom->setCanEnter(true);

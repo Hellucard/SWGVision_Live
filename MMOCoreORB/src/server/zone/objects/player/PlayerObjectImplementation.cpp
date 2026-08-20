@@ -63,7 +63,6 @@
 #include "server/zone/objects/player/events/StoreSpawnedChildrenTask.h"
 #include "server/zone/objects/player/events/RemoveSpouseTask.h"
 #include "server/zone/objects/player/events/PvpTefRemovalTask.h"
-#include "server/zone/objects/player/events/SpawnHelperDroidTask.h"
 #include "server/zone/managers/visibility/VisibilityManager.h"
 #include "server/zone/managers/jedi/JediManager.h"
 #include "server/zone/objects/player/events/ForceRegenerationEvent.h"
@@ -94,8 +93,8 @@ void PlayerObjectImplementation::initializeTransientMembers() {
 	IntangibleObjectImplementation::initializeTransientMembers();
 
 	countMaxCov = 4500; // Only report very large lists
-	foodFillingMax = 100;
-	drinkFillingMax = 100;
+	foodFillingMax = 500;
+	drinkFillingMax = 500;
 
 	duelList.setNoDuplicateInsertPlan();
 	chatRooms.setNoDuplicateInsertPlan();
@@ -194,10 +193,10 @@ void PlayerObjectImplementation::loadTemplateData(SharedObjectTemplate* template
 	trainerZoneName = getTrainerZoneName();
 
 	foodFilling = 0;
-	foodFillingMax = 100;
+	foodFillingMax = 500;
 
 	drinkFilling = 0;
-	drinkFillingMax = 100;
+	drinkFillingMax = 500;
 
 	reactionFines = 0;
 
@@ -586,6 +585,12 @@ void PlayerObjectImplementation::notifySceneReady() {
 			chatManager->handleChatEnterRoomById(creature, planetChat->getRoomID(), -1, true);
 		}
 	}
+
+	// Ensure every new and existing character joins Galaxy chat.
+	ManagedReference<ChatRoom*> galaxyChat = chatManager->getGalaxyChatRoom();
+
+	if (galaxyChat != nullptr)
+		addChatRoom(galaxyChat->getRoomID());
 
 	//Re-join chat rooms player was a member of before disconnecting.
 	for (int i = chatRooms.size() - 1; i >= 0; i--) {
@@ -3870,20 +3875,4 @@ String PlayerObjectImplementation::getPlayedTimeString(bool verbose) const {
 }
 
 void PlayerObjectImplementation::createHelperDroid() {
-	// Only spawn droid if character is less than 1 days old
-	if (getCharacterAgeInDays() >= 1 || isPrivileged())
-		return;
-
-	CreatureObject* player = dynamic_cast<CreatureObject*>(parent.get().get());
-
-	if (player == nullptr)
-		return;
-
-	Zone* zone = player->getZone();
-
-	if (zone == nullptr || zone->getZoneName() == "tutorial")
-		return;
-
-	Reference<Task*> createDroid = new SpawnHelperDroidTask(player);
-	createDroid->schedule(5000);
 }

@@ -1,5 +1,36 @@
 SkillTrainer = ScreenPlay:new {}
 
+function SkillTrainer:getTrainerSkills(trainerType)
+	if (trainerType == "trainer_fs" or trainerType == "trainer_jedi") then
+		return trainerSkills[trainerType]
+	end
+
+	if (trainerSkills.trainer_all == nil) then
+		local trainerTypes = {}
+		local allSkills = {}
+
+		for skillTrainerType, _ in pairs(trainerSkills) do
+			if (skillTrainerType ~= "trainer_fs" and skillTrainerType ~= "trainer_jedi" and skillTrainerType ~= "trainer_all") then
+				table.insert(trainerTypes, skillTrainerType)
+			end
+		end
+
+		table.sort(trainerTypes)
+
+		for i = 1, #trainerTypes, 1 do
+			local skills = trainerSkills[trainerTypes[i]]
+
+			for j = 1, #skills, 1 do
+				table.insert(allSkills, skills[j])
+			end
+		end
+
+		trainerSkills.trainer_all = allSkills
+	end
+
+	return trainerSkills.trainer_all
+end
+
 function SkillTrainer:getTrainerType(pPlayer, pNpc, pConvTemplate)
 	local pGhost = CreatureObject(pPlayer):getPlayerObject()
 	local isJediTrainer = false
@@ -17,7 +48,7 @@ end
 
 function SkillTrainer:getTeachableSkills(pPlayer, trainerType, qualifiedOnly)
 	local teachableSkills = { }
-	local skills = trainerSkills[trainerType]
+	local skills = self:getTrainerSkills(trainerType)
 
 	if (skills == nil or #skills == 0) then
 		return teachableSkills
@@ -118,7 +149,7 @@ function SkillTrainer:noCallback(pPlayer, pSui, eventIndex, ...)
 end
 
 function SkillTrainer:hasSurpassedTrainer(pPlayer, trainerType)
-	local skills = trainerSkills[trainerType]
+	local skills = self:getTrainerSkills(trainerType)
 
 	if (skills == nil or #skills == 0) then
 		return true
@@ -134,6 +165,10 @@ function SkillTrainer:hasSurpassedTrainer(pPlayer, trainerType)
 end
 
 function SkillTrainer:hasAllPrereqSkills(pPlayer, trainerType)
+	if (trainerType ~= "trainer_fs" and trainerType ~= "trainer_jedi") then
+		return true
+	end
+
 	local prereqSkills = self:getPrerequisiteTrainerSkills(trainerType)
 
 	if prereqSkills == nil then
@@ -150,7 +185,7 @@ function SkillTrainer:hasAllPrereqSkills(pPlayer, trainerType)
 end
 
 function SkillTrainer:getPrerequisiteTrainerSkills(trainerType)
-	local skills = trainerSkills[trainerType]
+	local skills = self:getTrainerSkills(trainerType)
 	local noviceSkill = skills[1] -- Novice line
 
 	if (noviceSkill == nil or noviceSkill == "") then

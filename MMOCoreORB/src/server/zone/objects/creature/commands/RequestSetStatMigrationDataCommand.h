@@ -43,8 +43,6 @@ public:
 			return GENERALERROR;
 		}
 
-		bool privilegedPlayer = ghost->isPrivileged();
-
 		ManagedReference<Facade*> facade = creature->getActiveSession(SessionFacadeType::MIGRATESTATS);
 		ManagedReference<MigrateStatsSession*> session = dynamic_cast<MigrateStatsSession*>(facade.get());
 
@@ -83,16 +81,8 @@ public:
 			return GENERALERROR;
 		}
 
-		// Player is in the tutorial zone and is allowed to migrate stats.
-		auto zone = creature->getZone();
-
-		if ((zone != nullptr && zone->getZoneName() == "tutorial") || privilegedPlayer) {
-			session->migrateStats();
-
-			if (privilegedPlayer) {
-				creature->sendSystemMessage("Stat Migration Permitted due to Staff Privileges.");
-			}
-		}
+		// Stat migration is available to every player from any location.
+		session->migrateStats();
 
 		return SUCCESS;
 	}

@@ -15,11 +15,16 @@ public:
 
 		const DeltaVector<int>* baseHam = creo->getBaseHAM();
 
+		int pointsRemaining = PlayerCreationManager::instance()->getTotalAttributeLimit(creo->getSpeciesName());
+
 		for (int i = 0; i < 9; ++i) {
-			insertInt(baseHam->get(i));
+			int value = baseHam->get(i);
+
+			insertInt(value);
+			pointsRemaining -= value;
 		}
 
-		insertInt(0); // Points Remaining
+		insertInt(pointsRemaining);
 
 		setCompression(true);
 	}

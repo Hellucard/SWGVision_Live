@@ -606,6 +606,9 @@ bool PlayerCreationManager::createCharacter(ClientCreateCharacterCallback* callb
 
 	playerManager->addPlayer(playerCreature);
 
+	String welcomeAnnouncement = "\\#ffff00" + playerCreature->getDisplayedName() + "\\#ffffff Has Joined WELCOME!\\#.";
+	chatManager->broadcastGalaxy(nullptr, welcomeAnnouncement);
+
 	client->addCharacter(playerCreature->getObjectID(), zoneServer.get()->getGalaxyID());
 
 	JediManager::instance()->onPlayerCreated(playerCreature);
@@ -622,6 +625,9 @@ bool PlayerCreationManager::createCharacter(ClientCreateCharacterCallback* callb
 
 	//Join auction chat room
 	ghost->addChatRoom(chatManager->getAuctionRoom()->getRoomID());
+	// Join galaxy-wide chat room
+	ghost->addChatRoom(chatManager->getGalaxyChatRoom()->getRoomID());
+
 
 	ManagedReference<SuiMessageBox*> box = new SuiMessageBox(playerCreature, SuiWindowType::NONE);
 	box->setPromptTitle("PLEASE NOTE");
@@ -678,9 +684,9 @@ int PlayerCreationManager::getTotalAttributeLimit(const String& race) const {
 			maleRace);
 
 	if (racialData != nullptr) {
-		return racialData->getAttributeTotal();
+		return racialData->getAttributeTotal() + 1000;
 	} else {
-		return racialCreationData.get("human_male")->getAttributeTotal();
+		return racialCreationData.get("human_male")->getAttributeTotal() + 1000;
 	}
 }
 

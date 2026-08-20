@@ -39,6 +39,7 @@ class ChatManager extends ManagedService implements Logger {
 	protected VectorMap<unsigned int, string> socialTypes;
 
 	ChatRoom galaxyRoom;
+	ChatRoom galaxyChatRoom;
 	ChatRoom groupRoom;
 	ChatRoom guildRoom;
 	ChatRoom auctionRoom;
@@ -451,6 +452,13 @@ class ChatManager extends ManagedService implements Logger {
 	public ChatRoom getGroupRoom() {
 		return groupRoom;
 	}
+	/*
+	 * Returns the galaxy-wide player chat room
+	 */
+	public ChatRoom getGalaxyChatRoom() {
+		return galaxyChatRoom;
+	}
+
 
 	/*
 	 * Returns the auction chat room

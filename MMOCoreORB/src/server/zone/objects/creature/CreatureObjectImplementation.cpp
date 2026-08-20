@@ -92,7 +92,6 @@
 #include "server/zone/managers/auction/AuctionSearchTask.h"
 #include "server/zone/objects/tangible/Instrument.h"
 #include "server/zone/managers/director/ScreenPlayObserver.h"
-#include "server/zone/objects/player/events/SpawnHelperDroidTask.h"
 
 float CreatureObjectImplementation::DEFAULTRUNSPEED = 5.376f;
 
@@ -1528,83 +1527,6 @@ void CreatureObjectImplementation::addSkill(Skill* skill, bool notifyClient) {
 		skillList.add(skill, nullptr);
 	}
 
-	if (isPlayerCreature()) {
-		String baseSkill[6] = {"combat_brawler_novice", "combat_marksman_novice", "outdoors_scout_novice", "science_medic_novice", "crafting_artisan_novice", "social_entertainer_novice"};
-		bool shouldSpawnHelper = false;
-
-		for (int i = 0; i < 6; i++) {
-			String baseName = baseSkill[i];
-			String skillName = skill->getSkillName();
-
-			if (baseName == skillName) {
-				shouldSpawnHelper = true;
-				break;
-			}
-		}
-
-		if (shouldSpawnHelper) {
-			PlayerObject* ghost = getPlayerObject();
-
-			if (ghost != nullptr && ghost->getCharacterAgeInDays() < 1) {
-				bool helperDroidSpawned = false;
-
-				Locker lock(ghost);
-
-				if (ghost->getActivePetsSize() > 0) {
-					for (int i = 0; i < ghost->getActivePetsSize(); i++) {
-						AiAgent* petAgent= ghost->getActivePet(i);
-
-						if (petAgent != nullptr && petAgent->isHelperDroidObject()) {
-							Reference<HelperDroidObject*> helperDroid = cast<HelperDroidObject*>(petAgent);
-
-							if (helperDroid != nullptr) {
-								Locker clock(helperDroid, ghost);
-								helperDroid->notifyHelperDroidSkillTrained(asCreatureObject(), skill->getSkillName());
-								helperDroidSpawned = true;
-							}
-						}
-					}
-				}
-
-				Zone* zone = getZone();
-
-				if (!helperDroidSpawned && zone != nullptr && zone->getZoneName() != "tutorial") {
-					Reference<Task*> createDroid = new SpawnHelperDroidTask(asCreatureObject());
-
-					if (createDroid != nullptr && !createDroid->isScheduled()) {
-						createDroid->execute();
-
-						Reference<CreatureObject*> creoRef = asCreatureObject();
-						Reference<Skill*> skillRef = skill;
-
-						Core::getTaskManager()->scheduleTask([creoRef, skillRef] {
-							PlayerObject* ghost = creoRef->getPlayerObject();
-
-							if (ghost != nullptr) {
-								Locker lock(ghost);
-
-								if (ghost->getActivePetsSize() == 0)
-									return;
-
-								for (int i = 0; i < ghost->getActivePetsSize(); i++) {
-									AiAgent* petAgent= ghost->getActivePet(i);
-
-									if (petAgent != nullptr && petAgent->isHelperDroidObject()) {
-										Reference<HelperDroidObject*> helperDroid = cast<HelperDroidObject*>(petAgent);
-
-										if (helperDroid != nullptr) {
-											Locker clock(helperDroid, ghost);
-											helperDroid->notifyHelperDroidSkillTrained(creoRef, skillRef->getSkillName());
-										}
-									}
-								}
-							}
-						}, "HelperDroidProfessionLambda", 2000);
-					}
-				}
-			}
-		}
-	}
 
 	// Some skills affect player movement, update speed and acceleration.
 	updateSpeedAndAccelerationMods();
@@ -2453,7 +2375,7 @@ void CreatureObjectImplementation::notifyLoadFromDatabase() {
 	auto skillManager = SkillManager::instance();
 	const SkillList* playerSkillList = getSkillList();
 
-	int totalSkillPointsWasted = 250;
+	int totalSkillPointsWasted = 500;
 
 	for (int i = 0; i < playerSkillList->size(); ++i) {
 		Skill* skill = playerSkillList->get(i);
