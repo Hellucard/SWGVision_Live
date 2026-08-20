@@ -606,7 +606,7 @@ bool PlayerCreationManager::createCharacter(ClientCreateCharacterCallback* callb
 
 	playerManager->addPlayer(playerCreature);
 
-	String welcomeAnnouncement = "\\#ffff00" + playerCreature->getDisplayedName() + "\\#ffffff Has Joined WELCOME!\\#.";
+	String welcomeAnnouncement = "[SWGVISION] \\#ffff00" + playerCreature->getDisplayedName() + "\\#ffffff Has Joined the Server\\#.";
 	chatManager->broadcastGalaxy(nullptr, welcomeAnnouncement);
 
 	client->addCharacter(playerCreature->getObjectID(), zoneServer.get()->getGalaxyID());

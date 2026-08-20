@@ -56,7 +56,7 @@ ZoneServerImplementation::ZoneServerImplementation(ConfigManager* config) :
 	configManager = config;
 
 	galaxyID = config->getZoneGalaxyID();
-	galaxyName = "Core3";
+	galaxyName = "SWGVision";
 
 	processor = nullptr;
 
