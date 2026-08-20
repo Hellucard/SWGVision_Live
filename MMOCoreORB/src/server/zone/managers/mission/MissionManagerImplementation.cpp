@@ -802,6 +802,16 @@ void MissionManagerImplementation::randomizeFactionTerminalMissions(CreatureObje
 	}
 }
 
+static Vector3 getMissionPosition(CreatureObject* player, float distance, float angle) {
+	float angleRads = angle * (Math::PI / 180.0f);
+	float newAngle = angleRads + (Math::PI / 2);
+
+	float newX = player->getWorldPositionX() + (cos(newAngle) * distance);
+	float newY = player->getWorldPositionY() + (sin(newAngle) * distance);
+
+	return Vector3(newX, newY, 0.0f);
+}
+
 void MissionManagerImplementation::randomizeGenericDestroyMission(CreatureObject* player, MissionObject* mission, const uint32 faction) {
 	Zone* zone = player->getZone();
 
@@ -832,8 +842,25 @@ void MissionManagerImplementation::randomizeGenericDestroyMission(CreatureObject
 		difficulty = 4;
 
 	int diffDisplay = difficultyLevel < 5 ? 4 : difficultyLevel;
+	int levelChoice = 0;
+	float directionChoice = -1.0f;
 
-	if (player->isGrouped()) {
+	PlayerObject* ghost = player->getPlayerObject();
+
+	if (ghost != nullptr) {
+		String levelData = ghost->getScreenPlayData("mission_level", "levelChoice");
+		String directionData = ghost->getScreenPlayData("mission_direction", "directionChoice");
+
+		if (!levelData.isEmpty())
+			levelChoice = Integer::valueOf(levelData);
+
+		if (!directionData.isEmpty())
+			directionChoice = Float::valueOf(directionData);
+	}
+
+	if (levelChoice > 0) {
+		diffDisplay += levelChoice;
+	} else if (player->isGrouped()) {
 		bool includeFactionPets = faction != Factions::FACTIONNEUTRAL || ConfigManager::instance()->includeFactionPetsForMissionDifficulty();
 		Reference<GroupObject*> group = player->getGroup();
 
@@ -871,7 +898,8 @@ void MissionManagerImplementation::randomizeGenericDestroyMission(CreatureObject
 
 		int distance = destroyMissionBaseDistance + destroyMissionDifficultyDistanceFactor * difficultyLevel;
 		distance += System::random(destroyMissionRandomDistance) + System::random(destroyMissionDifficultyRandomDistance * difficultyLevel);
-		startPos = player->getWorldCoordinate((float)distance, (float)System::random(360), false);
+		float direction = directionChoice >= 0.0f ? directionChoice : (float)System::random(360);
+		startPos = getMissionPosition(player, (float)distance, direction);
 
 		if (zone->isWithinBoundaries(startPos)) {
 			float height = zone->getHeight(startPos.getX(), startPos.getY());
