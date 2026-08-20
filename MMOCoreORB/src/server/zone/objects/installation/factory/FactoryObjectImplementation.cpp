@@ -566,7 +566,7 @@ bool FactoryObjectImplementation::startFactory() {
 	timer = 30;
 	info(true) << "Factory Testing Timer Set To: " << timer;
 #else
-	timer = ((int)schematic->getComplexity()) * 8;
+	timer = 0;
 #endif
 
 	if (!populateSchematicBlueprint(schematic))
@@ -709,7 +709,7 @@ void FactoryObjectImplementation::createNewObject() {
 		return;
 	}
 
-	int crateSize = schematic->getFactoryCrateSize();
+	int crateSize = 1000;
 
 	if (crateSize <= 0) {
 		stopFactory("manf_error", "", "", -1);
